@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FoodExpress — Connecting Customers & Restaurants</title>
+  <meta name="description" content="FoodExpress - demo food ordering site" />
+  <style>
+    :root{
+      --bg:#fafafa; --card:#fff; --muted:#6b7280; --accent:#ff4d4f;
+      --nav:#1f2937; --glass:rgba(255,255,255,0.6);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;color:#111;background:var(--bg);-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    header{position:sticky;top:0;background:linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.7));backdrop-filter: blur(6px);border-bottom:1px solid #eee;z-index:40}
+    .container{max-width:1100px;margin:0 auto;padding:18px}
+    .nav{display:flex;gap:12px;align-items:center}
+    .brand{font-weight:800;font-size:20px;color:var(--nav)}
+    nav ul{display:flex;gap:12px;list-style:none;margin:0;padding:0;align-items:center}
+    nav li{font-weight:600;color:#111}
+    .btn{display:inline-block;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+    .btn-accent{background:var(--accent);color:#fff;font-weight:700}
+    .hero{display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:center;padding:48px 0}
+    .hero h1{font-size:36px;margin:0;line-height:1.05}
+    .hero p{color:var(--muted);margin:12px 0 20px}
+    .hero .hero-card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 10px 30px rgba(15,23,42,0.06)}
+    .hero-img{border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(15,23,42,0.06)}
+    .hero-img img{width:100%;height:300px;object-fit:cover;display:block}
+    section{padding:30px 0}
+    h2{margin:0 0 12px;font-size:22px}
+    .grid{display:grid;gap:16px}
+    .restaurants{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+    .restaurant{background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 8px 20px rgba(15,23,42,0.05);cursor:pointer;transition:transform .15s}
+    .restaurant:hover{transform:translateY(-6px)}
+    .restaurant img{width:100%;height:160px;object-fit:cover;display:block}
+    .restaurant .meta{padding:12px}
+    .restaurant h3{margin:0 0 6px;font-size:18px}
+    .restaurant p{margin:0;color:var(--muted);font-size:14px}
+    .menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px}
+    .food-card{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 6px 18px rgba(15,23,42,0.04);text-align:center}
+    .food-card img{width:100%;height:140px;object-fit:cover;border-radius:8px}
+    .food-card h4{margin:10px 0 6px;font-size:16px}
+    .food-card p{margin:0;color:var(--muted);font-size:14px}
+    .food-card .price{font-weight:700;margin-top:8px}
+    .center{text-align:center}
+    .cart-panel{position:fixed;right:18px;bottom:18px;width:340px;max-width:90%;background:var(--card);border-radius:12px;box-shadow:0 20px 50px rgba(2,6,23,0.2);overflow:hidden;z-index:60}
+    .cart-header{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid #eee}
+    .cart-body{max-height:340px;overflow:auto;padding:12px}
+    .cart-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f2f2f2}
+    .cart-footer{padding:12px;border-top:1px solid #eee;text-align:center}
+    .muted{color:var(--muted);font-size:13px}
+    .small{font-size:13px}
+    footer{padding:18px 0;background:#111;color:#fff;margin-top:40px}
+    /* modals */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:80}
+    .modal{background:var(--card);padding:18px;border-radius:12px;max-width:420px;width:92%;box-shadow:0 30px 80px rgba(2,6,23,0.3)}
+    .form-row{display:grid;gap:8px;margin-bottom:10px}
+    input,select,textarea{padding:10px;border-radius:8px;border:1px solid #e6e6e6;width:100%}
+    .row{display:flex;gap:10px;align-items:center}
+    .logo-small{background:var(--accent);padding:6px 10px;border-radius:8px;color:#fff;font-weight:700}
+    /* responsive */
+    @media (max-width:920px){.hero{grid-template-columns:1fr;}.hero-img img{height:220px}}
+    @media (max-width:520px){nav ul{display:none}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="row" style="gap:14px">
+        <div class="logo-small">FE</div>
+        <div class="brand">FoodExpress</div>
+      </div>
+
+      <nav style="margin-left:auto">
+        <ul>
+          <li style="display:inline"><a href="#home">Home</a></li>
+          <li style="display:inline"><a href="#restaurants">Restaurants</a></li>
+          <li style="display:inline"><a href="#menu">Menu</a></li>
+          <li style="display:inline"><a href="#contact">Contact</a></li>
+          <li style="display:inline"><a href="#" id="loginBtn">Login</a></li>
+          <li style="display:inline"><a href="#" id="signupBtn">Signup</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" id="home">
+    <!-- Hero -->
+    <section class="hero">
+      <div>
+        <div style="display:inline-block;padding:6px 10px;border-radius:999px;background:#fff;border:1px solid #eee;font-weight:700;margin-bottom:12px">Fresh & Fast</div>
+        <h1>Connecting Customers & Restaurants — Order your favorites</h1>
+        <p>Browse restaurants, explore menus and place orders for quick delivery. Demo site with add-to-cart & local storage.</p>
+        <div style="margin-top:18px">
+          <button class="btn btn-accent" onclick="document.getElementById('restaurants').scrollIntoView({behavior:'smooth'})">View Restaurants</button>
+          <button class="btn" style="margin-left:8px" onclick="openCart()">Your Cart</button>
+        </div>
+      </div>
+
+      <div class="hero-img">
+        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1400&auto=format&fit=crop&s=PLACEHOLDER" alt="hero food">
+      </div>
+    </section>
+
+    <!-- Restaurants -->
+    <section id="restaurants">
+      <h2>Available Restaurants</h2>
+      <p class="muted">Click a restaurant to view its menu.</p>
+
+      <div class="grid restaurants" id="restaurantsGrid">
+        <!-- dynamic -->
+      </div>
+    </section>
+
+    <!-- Menu / selected restaurant -->
+    <section id="menuSection">
+      <h2 id="menuTitle">Menu</h2>
+      <p class="muted" id="menuSubtitle">Select a restaurant to see menu items.</p>
+
+      <div class="menu-grid" id="menuGrid">
+        <!-- dynamic -->
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact">
+      <h2>Contact</h2>
+      <p class="muted">For demo purposes contact is disabled. This is a static demo of FoodExpress layout and cart.</p>
+    </section>
+  </main>
+
+  <!-- Cart panel (floating) -->
+  <div id="cartPanel" class="cart-panel" style="display:none">
+    <div class="cart-header">
+      <div><strong>Your Cart</strong><div class="small muted" id="cartCount">0 items</div></div>
+      <div><button class="btn" onclick="closeCart()">Close</button></div>
+    </div>
+    <div class="cart-body" id="cartBody">
+      <!-- cart items -->
+    </div>
+    <div class="cart-footer">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div><strong>Total:</strong></div>
+        <div id="cartTotal">₹0</div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button class="btn" onclick="clearCart()">Clear</button>
+        <button class="btn btn-accent" onclick="placeOrder()">Place Order</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container" style="display:flex;justify-content:space-between;align-items:center">
+      <div><strong>FoodExpress</strong><div class="small muted">© <span id="year"></span> SESD Project</div></div>
+      <div class="muted small">Made with ♥ — Demo</div>
+    </div>
+  </footer>
+
+  <!-- Login / Signup modals -->
+  <div id="modalBackdrop" class="modal-backdrop">
+    <div class="modal" id="modalContent">
+      <!-- dynamic modal content -->
+    </div>
+  </div>
+
+  <script>
+    // sample data (restaurants + menus)
+    const data = [
+      {
+        id: 'r1', name: 'Spice Garden', cuisine: 'Indian', desc: 'Best Indian Cuisine', img: 'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?q=80&w=800',
+        menu: [
+          {id:'m1',name:'Hyderabadi Biryani',price:449,img:'https://images.unsplash.com/photo-1604908177443-3e4f56a7e1e8?q=80&w=800'},
+          {id:'m2',name:'Paneer Tikka',price:349,img:'https://images.unsplash.com/photo-1542444459-db1f6f4b0b0c?q=80&w=800'},
+          {id:'m3',name:'Butter Chicken',price:429,img:'https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=800'}
+        ]
+      },
+      {
+        id: 'r2', name: 'Pasta House', cuisine: 'Italian', desc: 'Italian Delights', img: 'https://images.unsplash.com/photo-1555992336-03a23c4a02e6?q=80&w=800',
+        menu: [
+          {id:'m4',name:'White Sauce Pasta',price:349,img:'https://images.unsplash.com/photo-1599785209707-28c3d8f7d9d0?q=80&w=800'},
+          {id:'m5',name:'Margherita Pizza',price:399,img:'https://images.unsplash.com/photo-1548365328-5b2f0b8e1b24?q=80&w=800'}
+        ]
+      },
+      {
+        id: 'r3', name: 'Burger Hub', cuisine: 'Fast Food', desc: 'Juicy Burgers & More', img: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=800',
+        menu: [
+          {id:'m6',name:'Cheese Burger',price:299,img:'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=800'},
+          {id:'m7',name:'Fries (Large)',price:129,img:'https://images.unsplash.com/photo-1606755962773-0e9a5f1c36e5?q=80&w=800'}
+        ]
+      },
+      {
+        id: 'r4', name: 'Sushi World', cuisine: 'Japanese', desc: 'Fresh Sushi', img: 'https://images.unsplash.com/photo-1600891963932-c3d42c0bfcab?q=80&w=800',
+        menu: [
+          {id:'m8',name:'Salmon Roll',price:399,img:'https://images.unsplash.com/photo-1541542684-3ecb6511af74?q=80&w=800'},
+          {id:'m9',name:'Miso Soup',price:99,img:'https://images.unsplash.com/photo-1543352634-5f0c1b4f9d38?q=80&w=800'}
+        ]
+      },
+      {
+        id: 'r5', name: 'Taco Fiesta', cuisine: 'Mexican', desc: 'Authentic Tacos', img: 'https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?q=80&w=800',
+        menu: [
+          {id:'m10',name:'Mexican Tacos',price:299,img:'https://images.unsplash.com/photo-1543352634-5f0c1b4f9d38?q=80&w=800'},
+          {id:'m11',name:'Nachos',price:219,img:'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=800'}
+        ]
+      },
+      {
+        id: 'r6', name: 'Urban Café', cuisine: 'Cafe', desc: 'Continental & Coffee', img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800',
+        menu: [
+          {id:'m12',name:'Healthy Salad',price:199,img:'https://images.unsplash.com/photo-1520201163981-8cc95007dd2a?q=80&w=800'},
+          {id:'m13',name:'Masala Dosa',price:179,img:'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800'}
+        ]
+      }
+    ];
+
+    // --------------------
+    // render restaurants
+    const restaurantsGrid = document.getElementById('restaurantsGrid');
+    const menuGrid = document.getElementById('menuGrid');
+    const menuTitle = document.getElementById('menuTitle');
+    const menuSubtitle = document.getElementById('menuSubtitle');
+
+    function createRestaurantCard(r){
+      const el = document.createElement('div');
+      el.className = 'restaurant';
+      el.innerHTML = `
+        <img src="${r.img}" alt="${r.name}">
+        <div class="meta">
+          <h3>${r.name}</h3>
+          <p class="muted">${r.cuisine} · ${r.desc}</p>
+        </div>`;
+      el.addEventListener('click', ()=> selectRestaurant(r.id));
+      return el;
+    }
+
+    function loadRestaurants(){
+      restaurantsGrid.innerHTML = '';
+      data.forEach(r => restaurantsGrid.appendChild(createRestaurantCard(r)));
+    }
+
+    function selectRestaurant(id){
+      const rest = data.find(r=>r.id===id);
+      menuGrid.innerHTML = '';
+      menuTitle.textContent = rest.name + ' — Menu';
+      menuSubtitle.textContent = `${rest.cuisine} • Tap items to add to cart`;
+      rest.menu.forEach(item=>{
+        const card = document.createElement('div');
+        card.className = 'food-card';
+        card.innerHTML = `
+          <img src="${item.img}" alt="${item.name}">
+          <h4>${item.name}</h4>
+          <p class="muted small">Restaurant: ${rest.name}</p>
+          <div class="price">₹${item.price}</div>
+          <div style="margin-top:10px"><button class="btn btn-accent" onclick='addToCart("${rest.id}","${item.id}")'>Add</button></div>
+        `;
+        menuGrid.appendChild(card);
+      });
+      window.scrollTo({top: document.getElementById('menuSection').offsetTop - 70, behavior:'smooth'});
+    }
+
+    // --------------------
+    // cart functionality
+    let cart = JSON.parse(localStorage.getItem('fe_cart')||'{}'); // {itemId: {id,name,price,qty,restId}}
+    function saveCart(){ localStorage.setItem('fe_cart', JSON.stringify(cart)); renderCart(); }
+    function addToCart(restId, itemId){
+      const rest = data.find(r=>r.id===restId);
+      const item = rest.menu.find(m=>m.id===itemId);
+      const key = itemId;
+      if(cart[key]) cart[key].qty++;
+      else cart[key] = {id:itemId, name:item.name, price:item.price, qty:1, rest:rest.name};
+      saveCart();
+      openCart();
+    }
+    function removeFromCart(key){
+      delete cart[key];
+      saveCart();
+    }
+    function changeQty(key, delta){
+      if(!cart[key]) return;
+      cart[key].qty += delta;
+      if(cart[key].qty < 1) delete cart[key];
+      saveCart();
+    }
+    function clearCart(){ cart={}; saveCart(); closeCart(); alert('Cart cleared'); }
+    function placeOrder(){
+      if(Object.keys(cart).length===0){ alert('Cart empty'); return; }
+      // demo: clear cart and show summary
+      const total = Object.values(cart).reduce((s,i)=>s + i.price*i.qty, 0);
+      cart = {}; saveCart();
+      closeCart();
+      alert('Order placed! Total: ₹' + total + '\n(This is a demo — no real payment implemented.)');
+    }
+
+    // render cart UI
+    function renderCart(){
+      const body = document.getElementById('cartBody');
+      const totalEl = document.getElementById('cartTotal');
+      const countEl = document.getElementById('cartCount');
+      body.innerHTML = '';
+      const items = Object.values(cart);
+      if(items.length===0){
+        body.innerHTML = '<div class="muted center">Your cart is empty</div>';
+        totalEl.textContent = '₹0';
+        countEl.textContent = '0 items';
+        return;
+      }
+      let total=0, count=0;
+      items.forEach(it=>{
+        total += it.price * it.qty;
+        count += it.qty;
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <div>
+            <div style="font-weight:700">${it.name}</div>
+            <div class="muted small">${it.rest}</div>
+            <div class="small muted">₹${it.price} × ${it.qty}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+              <div><button class="btn" onclick='changeQty("${it.id}",1)'>+</button> <button class="btn" onclick='changeQty("${it.id}",-1)'>−</button></div>
+              <button class="btn" style="background:transparent;color:var(--muted)" onclick='removeFromCart("${it.id}")'>Remove</button>
+            </div>
+          </div>
+        `;
+        body.appendChild(div);
+      });
+      totalEl.textContent = '₹' + total;
+      countEl.textContent = count + ' items';
+    }
+
+    function openCart(){ document.getElementById('cartPanel').style.display='block'; renderCart(); }
+    function closeCart(){ document.getElementById('cartPanel').style.display='none'; }
+
+    // --------------------
+    // login/signup demo (localStorage)
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalContent = document.getElementById('modalContent');
+
+    function showModal(html){ modalContent.innerHTML = html; modalBackdrop.style.display='flex'; }
+    function hideModal(){ modalBackdrop.style.display='none'; }
+
+    document.getElementById('loginBtn').addEventListener('click', (e)=>{
+      e.preventDefault();
+      showLogin();
+    });
+    document.getElementById('signupBtn').addEventListener('click', (e)=>{
+      e.preventDefault();
+      showSignup();
+    });
+
+    function showLogin(){
+      showModal(`
+        <h3>Login</h3>
+        <div class="form-row">
+          <input id="loginEmail" placeholder="Email or username">
+          <input id="loginPass" placeholder="Password" type="password">
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn" onclick="hideModal()">Cancel</button>
+          <button class="btn btn-accent" onclick="doLogin()">Login</button>
+        </div>
+      `);
+    }
+    function showSignup(){
+      showModal(`
+        <h3>Signup</h3>
+        <div class="form-row">
+          <input id="suName" placeholder="Full name">
+          <input id="suEmail" placeholder="Email">
+          <input id="suPass" placeholder="Password" type="password">
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn" onclick="hideModal()">Cancel</button>
+          <button class="btn btn-accent" onclick="doSignup()">Create</button>
+        </div>
+      `);
+    }
+
+    function doSignup(){
+      const name = document.getElementById('suName').value.trim();
+      const email = document.getElementById('suEmail').value.trim();
+      const pass = document.getElementById('suPass').value;
+      if(!name||!email||!pass){ alert('Please fill fields'); return; }
+      let users = JSON.parse(localStorage.getItem('fe_users')||'[]');
+      if(users.find(u=>u.email===email)) { alert('User exists'); return; }
+      users.push({name,email,pass});
+      localStorage.setItem('fe_users', JSON.stringify(users));
+      alert('Signup successful — you can login now');
+      hideModal();
+    }
+
+    function doLogin(){
+      const login = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPass').value;
+      const users = JSON.parse(localStorage.getItem('fe_users')||'[]');
+      const user = users.find(u => (u.email===login || u.name===login) && u.pass===pass);
+      if(!user){ alert('Invalid credentials (demo)'); return; }
+      localStorage.setItem('fe_user', JSON.stringify({name:user.name,email:user.email}));
+      alert('Welcome back, ' + user.name);
+      hideModal();
+    }
+
+    // close modal on backdrop click
+    modalBackdrop.addEventListener('click', (e)=>{ if(e.target===modalBackdrop) hideModal(); });
+
+    // utils
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // initial
+    loadRestaurants();
+    renderCart();
+
+    // Pre-select first restaurant so menu isn't empty
+    if(data.length) selectRestaurant(data[0].id);
+  </script>
+</body>
+</html>
